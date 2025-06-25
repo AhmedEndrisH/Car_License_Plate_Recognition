@@ -30,11 +30,11 @@ app.add_middleware(
 )
 
 # Serve static files (for result images)
-app.mount("/static", StaticFiles(directory="static"), name="static")
-os.makedirs("static", exist_ok=True)
+app.mount("/output_images", StaticFiles(directory="output images"), name="output_images")
+os.makedirs("output images", exist_ok=True)
 
 # Set up Jinja2 templates directory
-TEMPLATES_DIR = "templates"
+TEMPLATES_DIR = "Index"
 os.makedirs(TEMPLATES_DIR, exist_ok=True)
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
@@ -92,9 +92,9 @@ def predict_plate(image: Image.Image, conf_threshold: float = 0.3) -> dict:
     # Save input image for display
     input_img_url = None
     input_filename = f"input_{uuid.uuid4().hex}.jpg"
-    input_path = os.path.join("static", input_filename)
+    input_path = os.path.join("output images", input_filename)
     cv2.imwrite(input_path, cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    input_img_url = f"/static/{input_filename}"
+    input_img_url = f"/output_images/{input_filename}"
     # Process each detected plate
     for result in results:
         if result.boxes is not None:
@@ -119,16 +119,16 @@ def predict_plate(image: Image.Image, conf_threshold: float = 0.3) -> dict:
                 # Save the first plate preview for debugging (optional)
                 if plate_preview_url is None and plate_img.size > 0:
                     preview_filename = f"plate_preview_{uuid.uuid4().hex}.jpg"
-                    preview_path = os.path.join("static", preview_filename)
+                    preview_path = os.path.join("output images", preview_filename)
                     cv2.imwrite(preview_path, cv2.cvtColor(plate_img, cv2.COLOR_BGR2RGB))
-                    plate_preview_url = f"/static/{preview_filename}"
+                    plate_preview_url = f"/output_images/{preview_filename}"
     # Save annotated result image
     result_img_url = None
     if len(plates) > 0:
         result_filename = f"result_{uuid.uuid4().hex}.jpg"
-        result_path = os.path.join("static", result_filename)
+        result_path = os.path.join("output images", result_filename)
         cv2.imwrite(result_path, cv2.cvtColor(annotated_img, cv2.COLOR_BGR2RGB))
-        result_img_url = f"/static/{result_filename}"
+        result_img_url = f"/output_images/{result_filename}"
     return {
         "plates": plates,  # List of detected plates with text and bounding boxes
         "result_img_url": result_img_url,  # Annotated image URL

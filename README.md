@@ -35,15 +35,15 @@ An Efficent and easy-to-use web for car license plate detection and recognition 
    ```bash
    python main.py
    ```
-   The app will be available at [http://localhost:8000](http://localhost:8000)
+
 
 ---
 
 ## 🖼️ Example Interface
 
-<!-- ### Screenshot -->
+### Screenshot
 
-![App Screenshot](static/image.png)
+![App Screenshot](examples/image.png)
 
 <!-- ### Demo Video -->
 
@@ -72,14 +72,16 @@ An Efficent and easy-to-use web for car license plate detection and recognition 
 ## 📂 Project Structure
 
 ```
-car_license_plate/
+Car_License_Plate_Recognition/
 ├── main.py
 ├── requirements.txt
 ├── README.md
-├── templates/
+├── Index/
 │   └── index.html
-├── static/
-│   └── (generated images, screenshots, or demo video)
+├── output images/
+│   └── (This folder is for temporary output and is ignored by Git)
+├── examples/
+│   └── (Contains important visualizations like screenshots and demos)
 ├── Y11l_best.pt
 └── .gitignore
 ```
