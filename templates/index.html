@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI License Plate Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            min-height: 100vh;
+        }
+        .main-container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(80, 60, 180, 0.15);
+            padding: 36px 28px 16px 28px;
+            margin-top: 40px;
+            max-width: 950px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .header h1 {
+            font-size: 2.7rem;
+            font-weight: bold;
+            color: #4b3ca7;
+            letter-spacing: 1px;
+        }
+        .header p {
+            color: #6c63ff;
+            font-size: 1.15rem;
+        }
+        .upload-area {
+            border: 2.5px dashed #a18cd1;
+            border-radius: 14px;
+            padding: 32px 0;
+            text-align: center;
+            color: #a18cd1;
+            background: #faf7ff;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .upload-area.dragover {
+            border-color: #6c63ff;
+        }
+        .btn-orange {
+            background: linear-gradient(90deg, #ff7300 0%, #ffb347 100%);
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            box-shadow: 0 2px 8px rgba(255, 115, 0, 0.08);
+        }
+        .btn-orange:hover {
+            background: linear-gradient(90deg, #ff9500 0%, #ffd580 100%);
+        }
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px 16px;
+            min-height: 80px;
+            box-shadow: 0 2px 8px rgba(80, 60, 180, 0.07);
+        }
+        .json-box {
+            background: #f4f0fa;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 0.97rem;
+            min-height: 60px;
+            color: #4b3ca7;
+        }
+        .collapse-btn {
+            background: none;
+            border: none;
+            color: #4b3ca7;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .badge-plate {
+            background: linear-gradient(90deg, #6c63ff 0%, #a18cd1 100%);
+            color: #fff;
+            font-size: 1.1em;
+            margin-right: 8px;
+            margin-bottom: 4px;
+        }
+        .badge-unreadable {
+            background: #ff4d4f;
+            color: #fff;
+            font-size: 1.1em;
+            margin-right: 8px;
+            margin-bottom: 4px;
+        }
+        .footer {
+            text-align: center;
+            color: #6c63ff;
+            font-size: 0.95em;
+            margin-top: 32px;
+            opacity: 0.8;
+        }
+        .icon-success {
+            color: #28a745;
+            font-size: 1.2em;
+            margin-right: 4px;
+        }
+        .icon-fail {
+            color: #ff4d4f;
+            font-size: 1.2em;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center">
+        <div class="main-container w-100">
+            <div class="header">
+                <span style="font-size:2.5rem;">🚗</span>
+                <h1>AI License Plate Detector</h1>
+                <p>Upload car images to detect and read license plates</p>
+            </div>
+            <form id="upload-form" action="/predict" method="post" enctype="multipart/form-data">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Upload Car Image</label>
+                        <div id="upload-area" class="upload-area" {% if input_img_url %}style="display:none;"{% endif %}>
+                            <input type="file" id="file-input" name="file" accept="image/*" style="display:none;">
+                            <span id="upload-text">Drop Image Here<br>- or -<br>Click to Upload</span>
+                            <img id="preview-img" src="#" alt="" style="display:none; max-width:100%; margin-top:10px; border-radius:8px;" />
+                        </div>
+                        {% if input_img_url %}
+                        <div class="result-box d-flex align-items-center justify-content-center" id="input-image-box">
+                            <img src="{{ input_img_url }}" alt="Input Image" style="max-width:100%; border-radius:8px;" />
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Detection Results</label>
+                        <div class="result-box d-flex align-items-center justify-content-center" id="result-image-box">
+                            {% if result_img_url %}
+                                <img id="result-img" src="{{ result_img_url }}" alt="Detection Result" style="max-width:100%; border-radius:8px;" />
+                            {% else %}
+                                <span id="no-result-img">🖼️</span>
+                            {% endif %}
+                        </div>
+                        <div class="result-box mt-2" id="plate-preview-box" style="display:none;">
+                            <img id="plate-preview-img" src="#" alt="Plate Preview" style="max-width:100px; display:none; border:1px solid #aaa; border-radius:6px;" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6 d-flex gap-2">
+                        <button type="submit" class="btn btn-orange flex-fill">🔍 Detect Plates</button>
+                        <button type="button" class="btn btn-secondary flex-fill" id="clear-btn">🗑️ Clear</button>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Results</label>
+                        <div class="result-box" id="result-text-box">
+                            {% if plate_numbers and plate_numbers|length > 0 %}
+                                <strong><span class="icon-success">🎯</span>Detected Plate(s):</strong><br>
+                                {% for plate in plate_numbers %}
+                                    {% if plate != 'UNREADABLE' %}
+                                        <span class="badge badge-plate">{{ plate }}</span>
+                                    {% else %}
+                                        <span class="badge badge-unreadable"><span class="icon-fail">❌</span>Unreadable</span>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <span id="no-result-text"><span class="icon-fail">❌</span>No plates detected.</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button class="collapse-btn" type="button" data-bs-toggle="collapse" data-bs-target="#advanced-settings" aria-expanded="false" aria-controls="advanced-settings">
+                            ⚙️ Advanced Settings
+                        </button>
+                        <div class="collapse mt-2" id="advanced-settings">
+                            <div class="card card-body" style="background: #f8f9fa; border-radius: 10px; box-shadow: 0 2px 8px rgba(80, 60, 180, 0.07);">
+                                <label for="conf-threshold">Detection Confidence Threshold</label>
+                                <input type="range" class="form-range" id="conf-threshold" name="conf_threshold" min="0.1" max="1.0" step="0.05" value="{{ conf_threshold if conf_threshold else 0.3 }}" oninput="confValue.value = this.value; updateSliderBar();">
+                                <div class="slider-ruler" style="position:relative; height: 24px; margin-bottom: 8px;">
+                                    <div id="slider-bar" style="position:absolute; top:12px; left:0; height:6px; background:linear-gradient(90deg,#6c63ff,#ff7300); border-radius:3px; z-index:1;"></div>
+                                    <div style="position:absolute; top:18px; left:0; width:100%; height:1px; background:#ccc; z-index:0;"></div>
+                                    <div style="position:absolute; top:22px; left:0; width:100%; display:flex; justify-content:space-between; font-size:0.9em; color:#888;">
+                                        <span>0.1</span><span>0.3</span><span>0.5</span><span>0.7</span><span>0.9</span><span>1.0</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span></span>
+                                    <output id="confValue">{{ conf_threshold if conf_threshold else 0.3 }}</output>
+                                    <span></span>
+                                </div>
+                                <label>JSON Data</label>
+                                <div class="json-box" id="json-box">
+                                    {% if filtered_result %}
+                                        {{ filtered_result | tojson }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="footer">
+        <span>🚗 AI License Plate Detector &copy; 2024 &mdash; Powered by FastAPI, YOLO, and Tesseract OCR</span>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Drag and drop upload
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const previewImg = document.getElementById('preview-img');
+        const uploadText = document.getElementById('upload-text');
+        const clearBtn = document.getElementById('clear-btn');
+        const resultImg = document.getElementById('result-img');
+        const noResultImg = document.getElementById('no-result-img');
+        const resultTextBox = document.getElementById('result-text-box');
+        const jsonBox = document.getElementById('json-box');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                showPreview(fileInput.files[0]);
+            }
+        });
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                showPreview(fileInput.files[0]);
+            }
+        });
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                uploadText.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+        clearBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+        // Add error message for missing image
+        const uploadForm = document.getElementById('upload-form');
+        uploadForm.addEventListener('submit', function(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Please upload an image before detecting plates.');
+            }
+        });
+        // Confidence slider bar update
+        function updateSliderBar() {
+            const slider = document.getElementById('conf-threshold');
+            const bar = document.getElementById('slider-bar');
+            if (slider && bar) {
+                const percent = ((slider.value - 0.1) / 0.9) * 100;
+                bar.style.width = percent + '%';
+            }
+        }
+        updateSliderBar();
+        document.getElementById('conf-threshold').addEventListener('input', updateSliderBar);
+    </script>
+</body>
+</html>
