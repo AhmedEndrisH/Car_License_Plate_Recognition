@@ -93,9 +93,4 @@ MIT
 
 ---
 
-## 👤 Author
-
-[Ahmed Endris](https://github.com/AhmedEndrisH)
-
----
 
