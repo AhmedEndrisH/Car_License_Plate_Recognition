@@ -75,10 +75,8 @@ Car_License_Plate_Recognition/
 ├── README.md
 ├── Index/
 │   └── index.html
-├── output images/
-│   └── (This folder is for temporary output and is ignored by Git)
 ├── examples/
-│   └── (Contains important visualizations like screenshots and demos)
+│   └── (Contains sample visualizations like screenshots and demos)
 ├── Y11l_best.pt
 └── .gitignore
 ```
