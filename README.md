@@ -1,6 +1,6 @@
 # 🚗 Car License Plate Recognition
 
-An Efficent and easy-to-use web for car license plate detection and recognition using YOLO and EasyOCR, powered by FastAPI.
+An efficent and easy-to-use web for car license plate detection and recognition using YOLO and EasyOCR, powered by FastAPI.
 
 ---
 
@@ -28,8 +28,7 @@ An Efficent and easy-to-use web for car license plate detection and recognition 
    ```
 
 3. **Add your YOLO model file:**
-   - Place your `Y11l_best.pt` file in the project root.
-   - (Or provide a download link if you want to share a public model.)
+   - Place your model in the project root.
 
 4. **Run the app:**
    ```bash
@@ -43,7 +42,7 @@ An Efficent and easy-to-use web for car license plate detection and recognition 
 
 ### Screenshot
 
-![App Screenshot](examples/image.png)
+![App Screenshot](examples/image 1.png)
 
 <!-- ### Demo Video -->
 
