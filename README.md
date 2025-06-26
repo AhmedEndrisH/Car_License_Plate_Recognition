@@ -40,9 +40,7 @@ An efficent and easy-to-use web for car license plate detection and recognition 
 
 ## 🖼️ Example Interface
 
-### Screenshot
-
-![App Screenshot](examples/image 1.png)
+![App Screenshot](examples/image1.png)
 
 <!-- ### Demo Video -->
 
